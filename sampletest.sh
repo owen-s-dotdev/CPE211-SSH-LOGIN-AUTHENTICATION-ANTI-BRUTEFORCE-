@@ -26,4 +26,3 @@ else
     sudo systemctl enable --now fail2ban
     echo "Fail2ban has been started and enabled."
 fi
-
