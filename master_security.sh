@@ -21,9 +21,11 @@ show_menu() {
     echo "2) Set Idle Timeout (idletest.sh)"
     echo "3) Run IP Blacklist System (ipblacklistsystem.sh)"
     echo "4) Configure Account Lockout (locktest.sh)"
-    echo "5) View Security Logs (verbose.sh)"
-    echo "6) Run All Modules Sequentially"
-    echo "7) Exit"
+    echo "5) Manage IP Whitelist (whitelist.sh)"
+    echo "6) View Security Logs (verbose.sh)"
+    echo "7) View SSH Monitoring Report (monitor.sh)"
+    echo "8) Run All Modules Sequentially"
+    echo "9) Exit"
     echo "=========================================="
 }
 
@@ -55,16 +57,21 @@ while true; do
         2) run_script "idletest.sh" ;;
         3) run_script "ipblacklistsystem.sh" ;;
         4) run_script "locktest.sh" ;;
-        5) run_script "verbose.sh" ;;
-        6)
+        5) run_script "whitelist.sh" ;;
+        6) run_script "verbose.sh" ;;
+        7) run_script "monitor.sh" ;;
+        8)
            echo "Initiating full security deployment..."
            run_script "configurefail2ban.sh"
            run_script "idletest.sh"
            run_script "locktest.sh"
            run_script "ipblacklistsystem.sh"
+           run_script "whitelist.sh"
+           run_script "verbose.sh"
+           run_script "monitor.sh"
            echo "Full deployment complete."
            ;;
-        7) 
+        9) 
            echo "Exiting the Security Management System."
            exit 0 
            ;;
