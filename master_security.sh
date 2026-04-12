@@ -50,7 +50,7 @@ run_script() {
 # 5. Execute the main loop
 while true; do
     show_menu
-    read -p "Select an option [1 to 7]: " choice
+    read -p "Select an option [1 to 9]: " choice
     
     case $choice in
         1) run_script "configurefail2ban.sh" ;;
