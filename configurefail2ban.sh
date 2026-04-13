@@ -30,11 +30,14 @@ fi
 # PART 2: Configuring fail2ban to protect SSH.
 # Creates a local configuration file for fail2ban, which overrides the default settings. 
 
-# create a local configuration file for fail2ban
-sudo cp /etc/fail2ban/jail.conf /etc/fail2ban/jail.local
+JAIL_LOCAL="/etc/fail2ban/jail.local"
+echo "Configuring Fail2ban to protect SSH..."
 
 # configure fail2ban to protect SSH
-sudo tee -a /etc/fail2ban/jail.local > /dev/null <<EOF
+cat <<EOF > "$JAIL_LOCAL"
+[DEFAULT]
+ignoreip = 127.0.0.1/8 ::1
+
 [sshd]
 enabled = true
 port = ssh
@@ -43,8 +46,8 @@ logpath = /var/log/auth.log
 maxretry = 5
 bantime = 600
 findtime = 600
-ignoreip = 127.0.0.1
 EOF
 
 # restart fail2ban to apply changes
 sudo systemctl restart fail2ban
+echo "Fail2ban configuration applied successfully."

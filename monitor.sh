@@ -14,4 +14,5 @@ echo ""
 echo "Invalid User Attempts:"
 grep "Invalid user" $LOG_FILE
 
-# (incomplete) ^ only shows the failed login attempts as well as invalid users, will further improve by showing status such as if an ip is blocked as well as whitelisted ips
+# (incomplete) ^ only shows the failed login attempts as well as invalid users, 
+# will further improve by showing status such as if an ip is blocked as well as whitelisted ips
