@@ -4,10 +4,7 @@ LOG_FILE="/var/log/auth.log"
 BLACKLIST_FILE="/etc/ssh/ip_blacklist.txt"
 
 # 1. Verify root privileges
-if [[ $EUID -ne 0 ]]; then
-    echo "Error: This master script must be run as root or with sudo."
-    exit 1
-fi
+[[ $EUID -ne 0 ]] && echo "Run as root." && exit 1
 
 init_file() {
     [ ! -f "$BLACKLIST_FILE" ] && touch "$BLACKLIST_FILE"
