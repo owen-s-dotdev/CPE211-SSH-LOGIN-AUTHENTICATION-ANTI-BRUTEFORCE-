@@ -1,24 +1,74 @@
 #!/bin/bash
 
-# 1. Verify root privileges
+# Verify root privileges
 if [[ $EUID -ne 0 ]]; then
-    echo "Error: This master script must be run as root or with sudo."
+    echo "Error: This script must be run as root or with sudo."
     exit 1
 fi
 
 LOG_FILE="/var/log/auth.log"
+BLACKLIST="/etc/ssh/ip_blacklist.txt"
+WHITELIST="/etc/ssh/ip_whitelist.txt"
 
-echo "- SSH Monitoring Report -"
+echo "SSH SECURITY MONITORING REPORT"
 
-# counts failed login attempts per IP
+# SUMMARY
 echo ""
-echo "Failed Login Attempts per IP:"
-grep "Failed password" $LOG_FILE | awk '{print $(NF-3)}' | sort | uniq -c | sort -nr
+echo "SUMMARY"
+echo "Total Failed Attempts: $(grep -a -c 'Failed password' $LOG_FILE 2>/dev/null)"
+echo "Total Invalid Users: $(grep -a -c 'Invalid user' $LOG_FILE 2>/dev/null)"
 
-# shows invalid users
+# FAILED LOGIN ATTEMPTS
 echo ""
-echo "Invalid User Attempts:"
-grep "Invalid user" $LOG_FILE
+echo "FAILED LOGIN ATTEMPTS PER IP"
 
-# (incomplete) ^ only shows the failed login attempts as well as invalid users, 
-# will further improve by showing status such as if an ip is blocked as well as whitelisted ips
+FAILED=$(grep -a "Failed password" $LOG_FILE 2>/dev/null)
+
+if [ -z "$FAILED" ]; then
+    echo "No failed login attempts found."
+else
+    echo "$FAILED" | awk '{print $(NF-3)}' | sort | uniq -c | sort -nr | while read -r count ip
+    do
+        status=""
+
+        # Whitelist overrides block
+        if grep -q "$ip" "$WHITELIST" 2>/dev/null; then
+            status="[WHITELISTED]"
+        elif grep -q "$ip" "$BLACKLIST" 2>/dev/null; then
+            status="[BLOCKED]"
+        fi
+
+        echo "$count $ip $status"
+    done
+fi
+
+# INVALID USERS
+echo ""
+echo "INVALID USER ATTEMPTS"
+grep -a "Invalid user" $LOG_FILE 2>/dev/null || echo "No invalid user attempts found."
+
+# BLOCKED IPS
+echo ""
+echo "BLOCKED IPS"
+if [ -f "$BLACKLIST" ] && [ -s "$BLACKLIST" ]; then
+    cat "$BLACKLIST"
+else
+    echo "No blocked IPs."
+fi
+
+# WHITELISTED IPS
+echo ""
+echo "WHITELISTED IPS"
+if [ -f "$WHITELIST" ] && [ -s "$WHITELIST" ]; then
+    cat "$WHITELIST"
+else
+    echo "No whitelisted IPs."
+fi
+
+# FAIL2BAN STATUS
+echo ""
+echo "FAIL2BAN STATUS"
+fail2ban-client status sshd 2>/dev/null || echo "Fail2Ban not running or not configured."
+
+echo ""
+echo "END OF REPORT"
