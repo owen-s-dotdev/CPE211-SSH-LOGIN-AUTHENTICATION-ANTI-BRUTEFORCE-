@@ -2,10 +2,8 @@
 # configurefail2ban.sh
 
 # Ensuring script is run with root privileges. 
-if [ "$EUID" -ne 0 ]; then
-    echo "Please run as root or with sudo."
-    exit 1
-fi
+[[ $EUID -ne 0 ]] && echo "Run as root." && exit 1
+
 # PART 1: checking if fail2ban is installed and active. 
 # If it is not installed, the script updates the package list and installs fail2ban using apt. 
 # If fail2ban is already installed, it simply informs the user.

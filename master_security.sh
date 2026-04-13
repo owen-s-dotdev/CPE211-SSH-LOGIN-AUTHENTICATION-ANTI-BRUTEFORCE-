@@ -3,10 +3,7 @@
 # Centralized management script for the SSH security module suite.
 
 # 1. Verify root privileges
-if [[ $EUID -ne 0 ]]; then
-    echo "Error: This master script must be run as root or with sudo."
-    exit 1
-fi
+[[ $EUID -ne 0 ]] && echo "Run as root." && exit 1
 
 # 2. Dynamically determine the directory where the scripts are stored
 SCRIPT_DIR=$(dirname "$(readlink -f "$0")")

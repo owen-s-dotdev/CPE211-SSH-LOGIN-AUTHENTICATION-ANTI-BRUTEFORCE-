@@ -1,10 +1,7 @@
 #!/bin/bash
 
 # 1. Verify root privileges
-if [[ $EUID -ne 0 ]]; then
-    echo "Error: This master script must be run as root or with sudo."
-    exit 1
-fi
+[[ $EUID -ne 0 ]] && echo "Run as root." && exit 1
 
 WHITELIST_FILE="/etc/ssh/ip_whitelist.txt"
 
