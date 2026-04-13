@@ -9,33 +9,37 @@ echo "SSH SECURITY MONITORING REPORT"
 # SUMMARY
 echo ""
 echo "SUMMARY"
-echo "Total Failed Attempts: $(grep -c 'Failed password' $LOG_FILE)"
-echo "Total Invalid Users: $(grep -c 'Invalid user' $LOG_FILE)"
+echo "Total Failed Attempts: $(grep -a -c 'Failed password' $LOG_FILE 2>/dev/null)"
+echo "Total Invalid Users: $(grep -a -c 'Invalid user' $LOG_FILE 2>/dev/null)"
 
 # FAILED LOGIN ATTEMPTS
 echo ""
 echo "FAILED LOGIN ATTEMPTS PER IP"
-grep "Failed password" $LOG_FILE | \
-awk '{print $(NF-3)}' | sort | uniq -c | sort -nr | while read count ip
-do
-    status=""
 
-    # Check if IP is blocked
-    if grep -q "$ip" "$BLACKLIST" 2>/dev/null; then
-        status="[BLOCKED]"
-    
-    # Check if IP is whitelisted
-    elif grep -q "$ip" "$WHITELIST" 2>/dev/null; then
-        status="[WHITELISTED]"
-    fi
+FAILED=$(grep -a "Failed password" $LOG_FILE 2>/dev/null)
 
-    echo "$count $ip $status"
-done
+if [ -z "$FAILED" ]; then
+    echo "No failed login attempts found."
+else
+    echo "$FAILED" | awk '{print $(NF-3)}' | sort | uniq -c | sort -nr | while read count ip
+    do
+        status=""
+
+        # Whitelist should override block
+        if grep -q "$ip" "$WHITELIST" 2>/dev/null; then
+            status="[WHITELISTED]"
+        elif grep -q "$ip" "$BLACKLIST" 2>/dev/null; then
+            status="[BLOCKED]"
+        fi
+
+        echo "$count $ip $status"
+    done
+fi
 
 # INVALID USERS
 echo ""
 echo "INVALID USER ATTEMPTS"
-grep "Invalid user" $LOG_FILE || echo "No invalid user attempts found."
+grep -a "Invalid user" $LOG_FILE 2>/dev/null || echo "No invalid user attempts found."
 
 # BLOCKED IPS
 echo ""
@@ -59,6 +63,7 @@ fi
 echo ""
 echo "FAIL2BAN STATUS"
 sudo fail2ban-client status sshd 2>/dev/null || echo "Fail2Ban not running or not configured."
+
 echo ""
 echo "END OF REPORT"
 
