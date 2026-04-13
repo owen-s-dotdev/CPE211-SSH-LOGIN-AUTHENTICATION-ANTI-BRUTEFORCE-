@@ -61,3 +61,5 @@ echo "FAIL2BAN STATUS"
 sudo fail2ban-client status sshd 2>/dev/null || echo "Fail2Ban not running or not configured."
 echo ""
 echo "END OF REPORT"
+
+# This script shows summary of failed attempts and invalid users, failed login attempts, invalid users, blocked ips, whitelisted ips, status of fail2ban.
