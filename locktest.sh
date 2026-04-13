@@ -1,6 +1,12 @@
 #!/bin/bash
 # Purp: Lock user accounts after multiple failed SSH login attempts
 
+# 1. Verify root privileges
+if [[ $EUID -ne 0 ]]; then
+    echo "Error: This master script must be run as root or with sudo."
+    exit 1
+fi
+
 FAIL_LIMIT=3
 LOCK_TIME=600
 PAM_FILE="/etc/pam.d/sshd"

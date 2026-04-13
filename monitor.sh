@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# 1. Verify root privileges
+if [[ $EUID -ne 0 ]]; then
+    echo "Error: This master script must be run as root or with sudo."
+    exit 1
+fi
+
 LOG_FILE="/var/log/auth.log"
 
 echo "- SSH Monitoring Report -"

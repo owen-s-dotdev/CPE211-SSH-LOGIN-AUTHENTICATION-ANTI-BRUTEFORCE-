@@ -1,6 +1,12 @@
 #!/bin/bash
 # Purpose: Set automatic SSH logout for idle users
 
+# 1. Verify root privileges
+if [[ $EUID -ne 0 ]]; then
+    echo "Error: This master script must be run as root or with sudo."
+    exit 1
+fi
+
 IDLE_TIMEOUT=600  # 10 minutes
 
 # Backup sshd_config
