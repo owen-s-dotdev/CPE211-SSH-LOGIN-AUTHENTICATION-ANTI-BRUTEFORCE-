@@ -1,47 +1,74 @@
 #!/bin/bash
-
-# IP Blacklist System Script, this blocks the attacker's IP addresses based on failed SSH login attempts
-
+# Updated ipblacklistsystem.sh - now includes auto-blocking of IPs after 5 failed login attempts, and a menu for manual management of the blacklist.
 LOG_FILE="/var/log/auth.log"
 BLACKLIST_FILE="/etc/ssh/ip_blacklist.txt"
 
-# Ensure blacklist file exists
-if [ ! -f "$BLACKLIST_FILE" ]; then
-    sudo touch "$BLACKLIST_FILE"
-    sudo chmod 600 "$BLACKLIST_FILE"
-fi
-
-# Function: Extract failed SSH login IPs
-extract_failed_ips() {
-    grep "Failed password" "$LOG_FILE" | awk '{print $(NF-3)}' | sort | uniq -c | sort -nr
+init_file() {
+    [ ! -f "$BLACKLIST_FILE" ] && touch "$BLACKLIST_FILE"
+    chmod 600 "$BLACKLIST_FILE"
 }
 
-# Function: Block IP using iptables
-block_ip() {
-    local ip=$1
-    if ! grep -q "$ip" "$BLACKLIST_FILE"; then
-        echo "Blocking IP: $ip"
-        sudo iptables -A INPUT -s "$ip" -j DROP
-        echo "$ip" | sudo tee -a "$BLACKLIST_FILE" > /dev/null
+add_ip() {
+    read -p "Enter IP to blacklist: " ip
+    if ! grep -qx "$ip" "$BLACKLIST_FILE"; then
+        echo "$ip" >> "$BLACKLIST_FILE"
+        iptables -A INPUT -s "$ip" -j DROP
+        echo "Blacklisted: $ip"
     else
-        echo "IP $ip is already blacklisted."
+        echo "Already blacklisted."
     fi
 }
 
-# Main Execution
-echo "Scanning for failed SSH login attempts..."
-FAILED_IPS=$(extract_failed_ips)
+remove_ip() {
+    read -p "Enter IP to remove: " ip
+    sed -i "/^$ip$/d" "$BLACKLIST_FILE"
+    iptables -D INPUT -s "$ip" -j DROP 2>/dev/null
+    echo "Removed: $ip"
+}
 
-echo "Suspicious IPs detected:"
-echo "$FAILED_IPS"
+view_ips() {
+    echo "=== Blacklist ==="
+    cat "$BLACKLIST_FILE"
+}
 
-# Block IPs with more than 5 failed attempts
-echo "$FAILED_IPS" | while read -r count ip; do
-    if [ "$count" -gt 5 ]; then
-        block_ip "$ip"
+auto_block() {
+    if [ ! -f "$LOG_FILE" ]; then
+        echo "auth.log not found. Ubuntu/Debian only."
+        return
     fi
+
+    grep "Failed password" "$LOG_FILE" | awk '{print $(NF-3)}' | \
+    sort | uniq -c | sort -nr | while read count ip; do
+
+        [[ -z "$count" || -z "$ip" ]] && continue
+
+        if [[ "$count" =~ ^[0-9]+$ ]] && [ "$count" -gt 5 ]; then
+            if ! grep -qx "$ip" "$BLACKLIST_FILE"; then
+                echo "$ip" >> "$BLACKLIST_FILE"
+                iptables -A INPUT -s "$ip" -j DROP
+                echo "Auto-blocked: $ip"
+            fi
+        fi
+    done
+}
+
+init_file
+
+while true; do
+    echo ""
+    echo "=== UBUNTU BLACKLIST MENU ==="
+    echo "1. Auto blacklist"
+    echo "2. Add IP"
+    echo "3. Remove IP"
+    echo "4. View"
+    echo "5. Exit"
+    read -p "Choose: " c
+
+    case $c in
+        1) auto_block ;;
+        2) add_ip ;;
+        3) remove_ip ;;
+        4) view_ips ;;
+        5) exit ;;
+    esac
 done
-
-echo "Blacklist update complete."
-
-# All of these are just drafts and are created in github. will be testing it in linux terminal later.
