@@ -11,7 +11,7 @@
 # check if fail2ban is installed
 if [ -z "$(command -v fail2ban-client)" ]; then
     echo "Fail2ban is not installed. Installing..."
-    sudo apt update && sudo apt install -y fail2ban
+    apt update && sudo apt install -y fail2ban
 else
     echo "Fail2ban is already installed."
 fi
@@ -21,7 +21,7 @@ if systemctl is-active --quiet fail2ban; then
     echo "Fail2ban is active and running."
 else
     echo "Fail2ban is not active. Starting and enabling..."
-    sudo systemctl enable --now fail2ban
+    systemctl enable --now fail2ban
     echo "Fail2ban has been started and enabled."
 fi
 
@@ -47,5 +47,5 @@ findtime = 600
 EOF
 
 # restart fail2ban to apply changes
-sudo systemctl restart fail2ban
+systemctl restart fail2ban
 echo "Fail2ban configuration applied successfully."

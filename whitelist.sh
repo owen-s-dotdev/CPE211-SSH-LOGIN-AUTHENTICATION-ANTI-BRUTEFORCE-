@@ -16,6 +16,17 @@ add_ip() {
         echo "$ip" >> "$WHITELIST_FILE"
         iptables -I INPUT 1 -s "$ip" -j ACCEPT
         echo "Whitelisted: $ip"
+
+        # Add to Fail2ban ignoreip if configured 
+        JAIL_LOCAL="/etc/fail2ban/jail.local"
+         if [[ -f "$JAIL_LOCAL" ]]; then
+             if ! grep -q "^ignoreip .*$ip" "$JAIL_LOCAL"; then
+                 sed -i "/^ignoreip/ s/$/ $ip/" "$JAIL_LOCAL"
+                 systemctl restart fail2ban
+                 echo "Added to Fail2ban ignoreip list."
+             fi
+         fi
+         
     else
         echo "Already whitelisted."
     fi
