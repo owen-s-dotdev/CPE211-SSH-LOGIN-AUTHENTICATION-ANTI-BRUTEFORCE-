@@ -1,22 +1,33 @@
 #!/bin/bash
 # Purpose: Set automatic SSH logout for idle users
 
-# 1. Verify root privileges
 [[ $EUID -ne 0 ]] && echo "Run as root." && exit 1
 
 IDLE_TIMEOUT=600  # 10 minutes
+SSHD_CONFIG="/etc/ssh/sshd_config"
 
-# Backup sshd_config
-cp /etc/ssh/sshd_config /etc/ssh/sshd_config.bak
+# Backup config
+cp "$SSHD_CONFIG" "${SSHD_CONFIG}.bak"
 
-# Update or add settings
-sed -i "/^ClientAliveInterval/c\ClientAliveInterval $IDLE_TIMEOUT" /etc/ssh/sshd_config || \
-    echo "ClientAliveInterval $IDLE_TIMEOUT" >> /etc/ssh/sshd_config
+# Set or add ClientAliveInterval
+if grep -q "^ClientAliveInterval" "$SSHD_CONFIG"; then
+    sed -i "s/^ClientAliveInterval.*/ClientAliveInterval $IDLE_TIMEOUT/" "$SSHD_CONFIG"
+else
+    echo "ClientAliveInterval $IDLE_TIMEOUT" >> "$SSHD_CONFIG"
+fi
 
-sed -i "/^ClientAliveCountMax/c\ClientAliveCountMax 0" /etc/ssh/sshd_config || \
-    echo "ClientAliveCountMax 0" >> /etc/ssh/sshd_config
+# Set or add ClientAliveCountMax
+if grep -q "^ClientAliveCountMax" "$SSHD_CONFIG"; then
+    sed -i "s/^ClientAliveCountMax.*/ClientAliveCountMax 0/" "$SSHD_CONFIG"
+else
+    echo "ClientAliveCountMax 0" >> "$SSHD_CONFIG"
+fi
 
-# Apply changes
-systemctl restart sshd
+# Restart SSH service (supports both Ubuntu + Arch)
+if systemctl list-units --type=service | grep -q sshd; then
+    systemctl restart sshd
+else
+    systemctl restart ssh
+fi
 
 echo "SSH idle timeout set to $IDLE_TIMEOUT seconds."
