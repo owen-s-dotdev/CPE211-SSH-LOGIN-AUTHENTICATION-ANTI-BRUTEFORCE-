@@ -4,14 +4,26 @@
 [[ $EUID -ne 0 ]] && echo "Run as root." && exit 1
 
 WHITELIST_FILE="/etc/ssh/ip_whitelist.txt"
+BLACKLIST_FILE="/etc/ssh/ip_blacklist.txt"
 
 init_file() {
     [ ! -f "$WHITELIST_FILE" ] && touch "$WHITELIST_FILE"
     chmod 600 "$WHITELIST_FILE"
 }
 
+remove_from_blacklist() {
+    local ip=$1
+    sed -i "/^$ip$/d" "$BLACKLIST_FILE" 2>/dev/null
+    iptables -D INPUT -s "$ip" -j DROP 2>/dev/null
+
+    echo "Removed $ip from blacklist, if existed."
+}
+
 add_ip() {
     read -p "Enter IP to whitelist: " ip
+
+    remove_from_blacklist "$ip"
+
     if ! grep -qx "$ip" "$WHITELIST_FILE"; then
         echo "$ip" >> "$WHITELIST_FILE"
         iptables -I INPUT 1 -s "$ip" -j ACCEPT

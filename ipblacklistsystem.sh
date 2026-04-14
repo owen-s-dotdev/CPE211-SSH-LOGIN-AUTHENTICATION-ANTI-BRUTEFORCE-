@@ -2,6 +2,7 @@
 # Updated ipblacklistsystem.sh - now includes auto-blocking of IPs after 5 failed login attempts, and a menu for manual management of the blacklist.
 LOG_FILE="/var/log/auth.log"
 BLACKLIST_FILE="/etc/ssh/ip_blacklist.txt"
+WHITELIST_FILE="/etc/ssh/ip_whitelist.txt"
 
 # 1. Verify root privileges
 [[ $EUID -ne 0 ]] && echo "Run as root." && exit 1
@@ -9,6 +10,11 @@ BLACKLIST_FILE="/etc/ssh/ip_blacklist.txt"
 init_file() {
     [ ! -f "$BLACKLIST_FILE" ] && touch "$BLACKLIST_FILE"
     chmod 600 "$BLACKLIST_FILE"
+}
+
+is_whitelisted() {
+    local ip=$1
+    grep -qx "$ip" "$WHITELIST_FILE" 2>/dev/null
 }
 
 add_ip() {
@@ -46,6 +52,10 @@ auto_block() {
         [[ -z "$count" || -z "$ip" ]] && continue
 
         if [[ "$count" =~ ^[0-9]+$ ]] && [ "$count" -gt 5 ]; then
+            if is_whitelisted "$ip"; then
+                echo "skipping whitelisted IP: $ip"
+                continue
+            fi
             if ! grep -qx "$ip" "$BLACKLIST_FILE"; then
                 echo "$ip" >> "$BLACKLIST_FILE"
                 iptables -A INPUT -s "$ip" -j DROP
