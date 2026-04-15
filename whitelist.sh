@@ -48,6 +48,15 @@ remove_ip() {
     read -p "Enter IP to remove: " ip
     sed -i "/^$ip$/d" "$WHITELIST_FILE"
     iptables -D INPUT -s "$ip" -j ACCEPT 2>/dev/null
+
+    # Remove from Fail2ban ignoreip if configured
+    JAIL_LOCAL="/etc/fail2ban/jail.local"
+    if [[ -f "$JAIL_LOCAL" ]]; then
+        # Removes the specific IP and any trailing space
+        sed -i "/^ignoreip/ s/ $ip//g" "$JAIL_LOCAL"
+        systemctl restart fail2ban
+        echo "Removed from Fail2ban ignoreip list."
+    fi
     echo "Removed: $ip"
 }
 

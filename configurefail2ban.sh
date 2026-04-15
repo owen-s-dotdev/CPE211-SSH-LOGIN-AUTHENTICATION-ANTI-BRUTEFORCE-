@@ -26,18 +26,24 @@ else
 fi
 
 # PART 2: Configuring fail2ban to protect SSH.
-# Creates a local configuration file for fail2ban, which overrides the default settings. 
+# dedicated, isolated drop-in configuration file within the /etc/fail2ban/jail.d/ directory. 
+# Fail2ban automatically reads files in this directory, allowing modular configuration without 
+# interfering with other services.
 
-JAIL_LOCAL="/etc/fail2ban/jail.local"
-echo "Configuring Fail2ban to protect SSH..."
-
-# configure fail2ban to protect SSH
-cat <<EOF > "$JAIL_LOCAL"
+JAIL_DIR="/etc/fail2ban/jail.d"
+CUSTOM_CONF="$JAIL_DIR/custom_sshd.local"
+echo "Configuring Fail2ban to protect SSH safely..."
+ 
+# Ensure directory exists and write to an isolated modular file
+mkdir -p "$JAIL_DIR"
+cat <<EOF > "$CUSTOM_CONF"
 [DEFAULT]
 ignoreip = 127.0.0.1/8 ::1
 
 [sshd]
 enabled = true
+
+
 port = ssh
 filter = sshd
 logpath = /var/log/auth.log

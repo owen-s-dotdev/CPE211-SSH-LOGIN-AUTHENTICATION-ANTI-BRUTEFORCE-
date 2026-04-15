@@ -13,14 +13,24 @@ AUTH_LOG="/var/log/auth.log"
 
 echo "=== FAILED LOGINS ==="
 grep -i "failed\|invalid user" "$AUTH_LOG" 2>/dev/null \
-  | awk '{print $1, $2, $3, $9, $11}' | tail -n 10 \
+  | awk '{
+      for(i=1;i<=NF;i++) {
+          if ($i == "from") { ip=$(i+1); break; }
+      }
+      print $1, $2, $3, "IP:", (ip ? ip : "Unknown")
+  }' | tail -n 10 \
   || echo "None found."
 
 echo ""
 # Searches for successful logins with the keyword "accepted"
 echo "=== SUCCESSFUL LOGINS ==="
 grep -i "accepted" "$AUTH_LOG" 2>/dev/null \
-  | awk '{print $1, $2, $3, $9, $11}' | tail -n 10 \
+  | awk '{
+      for(i=1;i<=NF;i++) {
+          if ($i == "from") { ip=$(i+1); break; }
+      }
+      print $1, $2, $3, "IP:", (ip ? ip : "Unknown")
+  }' | tail -n 10 \
   || echo "None found."
 
 echo ""
