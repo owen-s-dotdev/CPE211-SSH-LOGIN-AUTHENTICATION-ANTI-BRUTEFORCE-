@@ -84,6 +84,3 @@ while true; do
     esac
 done
 
-
-#strickly done in arch linux, idk if this script would work in ubuntu. triny ko baguhin ung script para gumana sa ubuntu pero
-#unknown pa kung gagana. it's working on my end nmn.
