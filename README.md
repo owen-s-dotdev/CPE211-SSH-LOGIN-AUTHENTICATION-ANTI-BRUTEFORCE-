@@ -4,9 +4,9 @@ How to use:
 Ensure all bash scripts are within the same directory. 
 Master control script is master_security.sh and MUST be used with ROOT privileges.
 
-# SSH Security Management Suite
+# SSH Anti-Bruteforce Security Management Suite
 
-A modular, Bash-based security framework designed to harden SSH access on Debian and Ubuntu Linux servers. This suite automates the deployment of intrusion prevention systems, local account lockout policies, and inactive session timeouts, while providing tools for manual firewall auditing.
+A modular, Bash-based security framework designed to harden SSH access on Debian and Ubuntu Linux servers by preventing brute force attacks. This suite automates the deployment of intrusion prevention systems, local account lockout policies, and inactive session timeouts, while providing tools for manual firewall auditing.
 
 ## System Requirements
 
@@ -55,7 +55,7 @@ This is the server hosting the SSH service and the security scripts.
     ```
 2.  **Identify the Target IP**: Record the IP address assigned to this machine's active network interface.
     ```bash
-    ip a
+    ip a or ifconfig
     ```
 3.  **Deploy Defenses**: Launch the master script and select Option 8 to run the full automated security deployment.
     ```bash
