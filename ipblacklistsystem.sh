@@ -46,7 +46,7 @@ auto_block() {
         return
     fi
 
-    grep "Failed password" "$LOG_FILE" | awk '{print $(NF-3)}' | \
+    grep "Failed password" "$LOG_FILE" | grep -oP 'from \K[\d.]+' | \
     sort | uniq -c | sort -nr | while read count ip; do
 
         [[ -z "$count" || -z "$ip" ]] && continue

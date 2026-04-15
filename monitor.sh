@@ -27,7 +27,7 @@ FAILED=$(grep -a "Failed password" $LOG_FILE 2>/dev/null)
 if [ -z "$FAILED" ]; then
     echo "No failed login attempts found."
 else
-    echo "$FAILED" | awk '{print $(NF-3)}' | sort | uniq -c | sort -nr | while read -r count ip
+    echo "$FAILED" | grep -oP 'from \K[\d.]+' | sort | uniq -c | sort -nr | while read -r count ip
     do
         status=""
 

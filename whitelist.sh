@@ -30,7 +30,7 @@ add_ip() {
         echo "Whitelisted: $ip"
 
         # Add to Fail2ban ignoreip if configured 
-        JAIL_LOCAL="/etc/fail2ban/jail.local"
+        JAIL_LOCAL="/etc/fail2ban/jail.d/custom_sshd.local"
          if [[ -f "$JAIL_LOCAL" ]]; then
              if ! grep -q "^ignoreip .*$ip" "$JAIL_LOCAL"; then
                  sed -i "/^ignoreip/ s/$/ $ip/" "$JAIL_LOCAL"
@@ -50,7 +50,7 @@ remove_ip() {
     iptables -D INPUT -s "$ip" -j ACCEPT 2>/dev/null
 
     # Remove from Fail2ban ignoreip if configured
-    JAIL_LOCAL="/etc/fail2ban/jail.local"
+    JAIL_LOCAL="/etc/fail2ban/jail.d/custom_sshd.local"
     if [[ -f "$JAIL_LOCAL" ]]; then
         # Removes the specific IP and any trailing space
         sed -i "/^ignoreip/ s/ $ip//g" "$JAIL_LOCAL"
