@@ -11,7 +11,7 @@
 # check if fail2ban is installed
 if [ -z "$(command -v fail2ban-client)" ]; then
     echo "Fail2ban is not installed. Installing..."
-    apt update && sudo apt install -y fail2ban
+    apt update && apt install -y fail2ban
 else
     echo "Fail2ban is already installed."
 fi

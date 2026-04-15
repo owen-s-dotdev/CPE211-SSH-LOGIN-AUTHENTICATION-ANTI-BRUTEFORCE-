@@ -9,16 +9,16 @@ SSHD_CONFIG="/etc/ssh/sshd_config"
 # Backup config
 cp "$SSHD_CONFIG" "${SSHD_CONFIG}.bak"
 
-# Set or add ClientAliveInterval
-if grep -q "^ClientAliveInterval" "$SSHD_CONFIG"; then
-    sed -i "s/^ClientAliveInterval.*/ClientAliveInterval $IDLE_TIMEOUT/" "$SSHD_CONFIG"
+# Update ClientAliveInterval (handles commented lines)
+if grep -qE "^#?ClientAliveInterval" "$SSHD_CONFIG"; then
+    sed -i -E "s/^#?ClientAliveInterval.*/ClientAliveInterval $IDLE_TIMEOUT/" "$SSHD_CONFIG"
 else
     echo "ClientAliveInterval $IDLE_TIMEOUT" >> "$SSHD_CONFIG"
 fi
-
-# Set or add ClientAliveCountMax
-if grep -q "^ClientAliveCountMax" "$SSHD_CONFIG"; then
-    sed -i "s/^ClientAliveCountMax.*/ClientAliveCountMax 0/" "$SSHD_CONFIG"
+ 
+# Update ClientAliveCountMax (handles commented lines)
+if grep -qE "^#?ClientAliveCountMax" "$SSHD_CONFIG"; then
+    sed -i -E "s/^#?ClientAliveCountMax.*/ClientAliveCountMax 0/" "$SSHD_CONFIG"
 else
     echo "ClientAliveCountMax 0" >> "$SSHD_CONFIG"
 fi

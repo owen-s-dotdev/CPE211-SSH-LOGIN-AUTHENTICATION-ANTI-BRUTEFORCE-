@@ -10,15 +10,10 @@ PAM_FILE="/etc/pam.d/sshd"
 # Backup PAM config
 cp "$PAM_FILE" "${PAM_FILE}.bak"
 
-# Add faillock rules safely (only if missing)
-
-grep -q "pam_faillock.so preauth" "$PAM_FILE" || \
-sed -i "1i auth required pam_faillock.so preauth silent deny=$FAIL_LIMIT unlock_time=$LOCK_TIME" "$PAM_FILE"
-
-grep -q "pam_faillock.so authfail" "$PAM_FILE" || \
-sed -i "/pam_unix.so/a auth [default=die] pam_faillock.so authfail deny=$FAIL_LIMIT unlock_time=$LOCK_TIME" "$PAM_FILE"
-
-grep -q "account required pam_faillock.so" "$PAM_FILE" || \
-echo "account required pam_faillock.so" >> "$PAM_FILE"
+# Remove existing faillock entries to prevent duplicates
+sed -i '/pam_faillock.so/d' "$PAM_FILE"
+ 
+# Insert PAM rules right after the first line safely
+sed -i "1 a auth required pam_faillock.so preauth silent deny=$FAIL_LIMIT unlock_time=$LOCK_TIME\nauth [default=die] pam_faillock.so authfail deny=$FAIL_LIMIT unlock_time=$LOCK_TIME\naccount required pam_faillock.so" "$PAM_FILE"
 
 echo "Accounts will be locked after $FAIL_LIMIT failed attempts for $LOCK_TIME seconds."

@@ -32,9 +32,9 @@ else
         status=""
 
         # Whitelist overrides block
-        if grep -q "$ip" "$WHITELIST" 2>/dev/null; then
+        if grep -qx "$ip" "$WHITELIST" 2>/dev/null; then
             status="[WHITELISTED]"
-        elif grep -q "$ip" "$BLACKLIST" 2>/dev/null; then
+        elif grep -qx "$ip" "$BLACKLIST" 2>/dev/null; then
             status="[BLOCKED]"
         fi
 
