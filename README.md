@@ -96,3 +96,13 @@ Return to the defending machine to confirm the attack was neutralized.
     ```bash
     sudo bash monitor.sh
     ```
+
+## Credits and Authors
+
+* **Pios, Joshua Paul B.** : Project Leader and System Architect
+* **Dueñas, Ranzel Aldous Gabriel L.** : Developer and Debugger
+* **Masongsong, John Marvin B.** : Developer and Tester
+* **Momo, Borge Rudolf A.** : Developer, Tester, and Debugger
+* **Santiago, David Owen A.** : Primary Developer and System Architect
+
+This project was developed for CPE211 AY 2025-2026.
