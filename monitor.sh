@@ -70,5 +70,10 @@ echo ""
 echo "FAIL2BAN STATUS"
 fail2ban-client status sshd 2>/dev/null || echo "Fail2Ban not running or not configured."
 
+# HISTORICAL TRENDS (LAST 7 DAYS)
+echo ""
+echo ""
+echo "Date       Time     IP Address        Status"
+grep "Ban" /var/log/fail2ban.log
 echo ""
 echo "END OF REPORT"
